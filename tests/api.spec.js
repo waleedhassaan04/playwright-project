@@ -292,7 +292,7 @@ test('LOGOUT est', async ({ request }) => {
 // })  */
 
 
-import { test, expect } from "@playwright/test";
+ /* import { test, expect } from "@playwright/test";
 
 
 const BASE_URL = "https://api-testing-postman.vercel.app/api/v1";
@@ -303,7 +303,7 @@ const BASE_URL = "https://api-testing-postman.vercel.app/api/v1";
 
 const TEST_USER = {
   fullname: "FILZA",
-  username: "filzaeisha2026",
+  username: "filzaisha202e6",
   email: "filzaeisha2026@test.com",
   password: "FILZA11",
 };
@@ -369,7 +369,7 @@ test("GET API Test", async ({ request }) => {
     `${BASE_URL}/users/current-user`,
     {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Breaer ${token}`,
       },
     }
   );
@@ -393,7 +393,7 @@ test("POST Register API Test", async ({ request }) => {
    * This test does NOT modify our main login credentials.
    */
 
-  const uniqueId = Date.now();
+  /*const uniqueId = Date.now();
 
   const registerData = {
     fullname: "FILZA",
@@ -413,7 +413,7 @@ test("POST Register API Test", async ({ request }) => {
    * the main test account.
    */
 
-  const token = await login(request);
+   /*const token = await login(request);
 
   const registerResponse = await request.post(
     `${BASE_URL}/users/register`,
@@ -436,7 +436,7 @@ test("POST Register API Test", async ({ request }) => {
     registerResponse.status(),
     `Registration failed: ${JSON.stringify(responseBody)}`
   ).toBe(201);
-});
+});  
 
 // =====================================================
 // 3. PUT API TEST
@@ -488,7 +488,7 @@ test("PUT API Test", async ({ request }) => {
    * Password is NOT changed by PUT.
    */
 
-  credentials.username = newUsername;
+  /*credentials.username = newUsername;
   credentials.email = newEmail;
 
   console.log("UPDATED USERNAME:", credentials.username);
@@ -539,7 +539,7 @@ test("PATCH Account Details API Test", async ({ request }) => {
    * PATCH changes email only.
    */
 
-  credentials.email = patchEmail;
+  /*credentials.email = patchEmail;
 
   console.log("PATCH EMAIL SAVED:", credentials.email);
 });
@@ -597,7 +597,7 @@ test("POST Change Password API Test", async ({ request }) => {
    * uses the correct password.
    */
 
-  credentials.password = newPassword;
+  /*credentials.password = newPassword;
 
   console.log(
     "NEW PASSWORD SAVED:",
@@ -668,6 +668,363 @@ test("DELETE API Test", async ({ request }) => {
     `Delete failed: ${JSON.stringify(responseBody)}`
   ).toBe(200);
 
-  console.log("ACCOUNT DELETED SUCCESSFULLY");
+  console.log("ACCOUNT DELETED SUCCESSFULLY");  
 });
+  */
+
+import { test, expect } from "@playwright/test";
+import userData from "../testdata/userdata.json";
+
+import UserPage from "../pages/UserPage.js";
+
+
+test.describe("User API", () => {
+
+  test.describe.configure({
+    mode: "serial",
+  });
+
+
+  // ============================================
+  // TEST USER DATA
+  // ============================================
+
+  const BASE_URL = userData.BASE_URL;
+
+  let credentials = {
+    username: userData.TEST_USER.username,
+    email: userData.TEST_USER.email,
+    password: userData.TEST_USER.password,
+  };
+
+
+  // ============================================
+  // GET CURRENT USER
+  // ============================================
+
+  test("GET current user", async ({ request }) => {
+
+    const user = new UserPage();
+
+    const loginResult =
+      await user.login(
+        request,
+        credentials,
+        BASE_URL
+      );
+
+    expect(
+      loginResult.response.status(),
+      `Login failed: ${JSON.stringify(loginResult.body)}`
+    ).toBe(200);
+
+    const token = loginResult.token;
+
+
+    const getResult =
+      await user.getCurrentUser(
+        request,
+        token,
+        BASE_URL
+      );
+
+    expect(
+      getResult.response.status()
+    ).toBe(200);
+
+  }); 
+
+
+  // ============================================
+  // REGISTER USER
+  // ============================================
+
+  test("POST register user", async ({ request }) => {
+
+    const user = new UserPage();
+
+    const loginResult =
+      await user.login(
+        request,
+        credentials,
+        BASE_URL
+      );
+
+    expect(
+      loginResult.response.status(),
+      `Login failed: ${JSON.stringify(loginResult.body)}`
+    ).toBe(200);
+
+    const token = loginResult.token;
+
+
+    const registerResult =
+      await user.registerUser(
+        request,
+        token,
+        BASE_URL,
+        userData.REGISTER_USER
+      );
+
+
+    expect(
+      registerResult.response.status(),
+      `Registration failed: ${JSON.stringify(registerResult.body)}`
+    ).toBe(201);
+
+  });
+
+
+  // ============================================
+  // PUT REPLACE ACCOUNT
+  // ============================================
+
+  test("PUT replace account", async ({ request }) => {
+
+    const user = new UserPage();
+
+    const loginResult =
+      await user.login(
+        request,
+        credentials,
+        BASE_URL
+      );
+
+    expect(
+      loginResult.response.status(),
+      `Login failed: ${JSON.stringify(loginResult.body)}`
+    ).toBe(200);
+
+    const token = loginResult.token;
+
+
+    const putResult =
+      await user.replaceAccount(
+        request,
+        token,
+        BASE_URL,
+        userData.PUT_USER
+      );
+
+
+    expect(
+      putResult.response.status(),
+      `PUT failed: ${JSON.stringify(putResult.body)}`
+    ).toBe(200);
+
+
+    // SAVE UPDATED USERNAME AND EMAIL
+    credentials.username =
+      putResult.newUsername;
+
+    credentials.email =
+      putResult.newEmail;
+
+
+    console.log(
+      "UPDATED USERNAME:",
+      credentials.username
+    );
+
+    console.log(
+      "UPDATED EMAIL:",
+      credentials.email
+    );
+
+    console.log(
+      "PASSWORD REMAINS:",
+      credentials.password
+    );
+
+  });
+
+
+  // ============================================
+  // PATCH UPDATE ACCOUNT
+  // ============================================
+
+  test("PATCH update account", async ({ request }) => {
+
+    const user = new UserPage();
+
+    const loginResult =
+      await user.login(
+        request,
+        credentials,
+        BASE_URL
+      );
+
+    expect(
+      loginResult.response.status(),
+      `Login failed: ${JSON.stringify(loginResult.body)}`
+    ).toBe(200);
+
+    const token = loginResult.token;
+
+
+    const patchResult =
+      await user.updateAccount(
+        request,
+        token,
+        BASE_URL,
+        userData.PATCH_USER
+      );
+
+
+    expect(
+      patchResult.response.status(),
+      `PATCH failed: ${JSON.stringify(patchResult.body)}`
+    ).toBe(200);
+
+
+    // SAVE UPDATED EMAIL
+    credentials.email =
+      patchResult.patchEmail;
+
+
+    console.log(
+      "PATCH EMAIL SAVED:",
+      credentials.email
+    );
+
+  });
+
+
+  // ============================================
+  // CHANGE PASSWORD
+  // ============================================
+
+  test("POST change password", async ({ request }) => {
+
+    const user = new UserPage();
+
+    const loginResult =
+      await user.login(
+        request,
+        credentials,
+        BASE_URL
+      );
+
+    expect(
+      loginResult.response.status(),
+      `Login failed: ${JSON.stringify(loginResult.body)}`
+    ).toBe(200);
+
+    const token = loginResult.token;
+
+
+    const changePasswordResult =
+      await user.changePassword(
+        request,
+        token,
+        BASE_URL,
+        credentials.password
+      );
+
+
+    expect(
+      changePasswordResult.response.status(),
+      `Change password failed: ${JSON.stringify(changePasswordResult.body)}`
+    ).toBe(200);
+
+
+    // SAVE NEW PASSWORD
+    credentials.password =
+      changePasswordResult.newPassword;
+
+
+    console.log(
+      "NEW PASSWORD SAVED:",
+      credentials.password
+    );
+
+  });
+
+
+  // ============================================
+  // LOGOUT
+  // ============================================
+
+  test("POST logout", async ({ request }) => {
+
+    const user = new UserPage();
+
+    const loginResult =
+      await user.login(
+        request,
+        credentials,
+        BASE_URL
+      );
+
+    expect(
+      loginResult.response.status(),
+      `Login failed: ${JSON.stringify(loginResult.body)}`
+    ).toBe(200);
+
+    const token = loginResult.token;
+
+
+    const logoutResult =
+      await user.logout(
+        request,
+        token,
+        BASE_URL
+      );
+
+
+    expect(
+      logoutResult.response.status(),
+      `Logout failed: ${JSON.stringify(logoutResult.body)}`
+    ).toBe(200);
+
+  });
+
+
+  // ============================================
+  // DELETE ACCOUNT
+  // ============================================
+
+  test("DELETE account", async ({ request }) => {
+
+    const user = new UserPage();
+
+    const loginResult =
+      await user.login(
+        request,
+        credentials,
+        BASE_URL
+      );
+
+    expect(
+      loginResult.response.status(),
+      `Login failed: ${JSON.stringify(loginResult.body)}`
+    ).toBe(200);
+
+    const token = loginResult.token;
+
+
+    const deleteResult =
+      await user.deleteAccount(
+        request,
+        token,
+        BASE_URL,
+        credentials
+      );
+
+
+    expect(
+      deleteResult.response.status(),
+      `Delete failed: ${JSON.stringify(deleteResult.body)}`
+    ).toBe(200);
+
+
+    console.log(
+      "ACCOUNT DELETED SUCCESSFULLY"
+    );
+
+  });
+
+});
+
+
 
