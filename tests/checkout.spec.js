@@ -98,4 +98,7 @@ test('Checkout', async ({ page }) => {
             '02 - Logout Success'
         );
     });
-})
+})  
+
+
+    
